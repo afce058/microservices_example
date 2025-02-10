@@ -68,7 +68,7 @@ jobs:
     uses: ./.github/workflows/create_sbom.yaml
     needs: 
       - parameters
-      - compute_tag
+      - create_tag
     strategy:
       matrix:
         micro: ${{ fromJson(needs.parameters.outputs.services) }}
