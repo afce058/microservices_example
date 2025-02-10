@@ -45,7 +45,7 @@ jobs:
         working-directory: ${{ github.workspace }}/${{ inputs.microservicePath }}
         run: |
           docker build -t \
-          docker.io/\
+          ${{ secrets.DOCKER_REGISTRY }}/\
           ${{ inputs.microservicePath }}:\
           ${{ inputs.tag }} \
           --file ${{ inputs.dockerfileName }} \
@@ -66,6 +66,15 @@ jobs:
           name: trivy_results_${{ inputs.microservicePath }}_${{ inputs.tag }}
           path: trivy_results_${{ inputs.microservicePath }}_${{ inputs.tag }}.sarif
           retention-days: 4
+
+      - name: Verify Docker login
+        run: docker info | grep "Username" || echo "Not logged in"
+
+      - name: List Docker images
+        run: docker images
+
+      - name: Check image exists before push
+        run: docker images | grep afce030 || echo "Image not found"
 
       - name: push container
         run: |
