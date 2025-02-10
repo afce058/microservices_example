@@ -1,4 +1,9 @@
 name: Push container
+permissions:
+  actions: write
+  packages: write
+  contents: read
+
 on:
   workflow_call:
     inputs:
