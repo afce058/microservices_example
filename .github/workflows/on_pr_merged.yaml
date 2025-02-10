@@ -76,3 +76,43 @@ jobs:
     with:
       tag: ${{ needs.create_tag.outputs.tag_version }}
       microservicePath: ${{ matrix.micro }}
+    
+  create_service_containers:
+    uses: ./.github/workflows/create_container.yaml
+    needs:
+      - parameters
+      - create_tag
+      - create_sbom
+    strategy:
+      matrix:
+        micro: ${{ fromJson(needs.parameters.outputs.services) }}
+      max-parallel: ${{ fromJson(needs.parameters.outputs.parallel) }}
+    with:
+      tag: ${{ needs.create_tag.outputs.tag_version }}
+      microservicePath: ${{ matrix.micro }}
+      dockerfileName: Dockerfile
+    secrets:
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  create_front_container:
+    uses: ./.github/workflows/create_container_front.yaml
+    needs:
+      - parameters
+      - create_tag
+      - create_sbom
+      - create_service_containers
+    strategy:
+      matrix:
+        micro: ${{ fromJson(needs.parameters.outputs.services) }}
+      max-parallel: ${{ fromJson(needs.parameters.outputs.parallel) }}
+    with:
+      tag: ${{ needs.create_tag.outputs.tag_version }}
+      microservicePath: ${{ matrix.micro }}
+      dockerfileName: Dockerfile
+      baseAddr: localhost:4000
+    secrets:
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
