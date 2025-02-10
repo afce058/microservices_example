@@ -45,7 +45,7 @@ jobs:
         working-directory: ${{ github.workspace }}/${{ inputs.microservicePath }}
         run: |
           docker build -t \
-          ${{ secrets.DOCKER_REGISTRY }}/\
+          ${{ secrets.DOCKER_USERNAME }}/\
           ${{ inputs.microservicePath }}:\
           ${{ inputs.tag }} \
           --file ${{ inputs.dockerfileName }} \
@@ -78,4 +78,4 @@ jobs:
 
       - name: push container
         run: |
-          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ inputs.microservicePath }}:${{ inputs.tag }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ inputs.microservicePath }}:${{ inputs.tag }}
