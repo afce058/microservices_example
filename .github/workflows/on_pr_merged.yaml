@@ -42,7 +42,7 @@ jobs:
     strategy:
       matrix:
         micro: ${{ fromJson(needs.parameters.outputs.services) }}
-      max-parallel: ${{ needs.parameters.outputs.parallel }}
+      max-parallel: ${{ fromJson(needs.parameters.outputs.parallel) }}
     with:
       microservicePath: ${{ matrix.micro }}
   
@@ -72,7 +72,7 @@ jobs:
     strategy:
       matrix:
         micro: ${{ fromJson(needs.parameters.outputs.services) }}
-      max-parallel: ${{ needs.parameters.outputs.parallel }}
+      max-parallel: ${{ fromJson(needs.parameters.outputs.parallel) }}
     with:
       tag: ${{ needs.compute_tag.outputs.tag_version }}
       microservicePath: ${{ matrix.micro }}
