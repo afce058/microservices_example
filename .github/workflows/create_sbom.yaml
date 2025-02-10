@@ -1,0 +1,36 @@
+name: Create sbom for microservice
+on:
+  workflow_call:
+    inputs:
+      microservicePath:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+jobs:
+  run_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout microservice
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            ${{ inputs.microservicePath }}
+      - name: setup nodejs
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: run tests
+        working-directory: ${{ github.workspace }}/${{ inputs.microservicePath }}
+        run: |
+          npm install
+          npx @cyclonedx/cyclonedx-npm --output-file \
+          sbom_${{ inputs.microservicePath }}_${{ inputs.tag }}.json
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with: 
+          name: sbom_${{ inputs.microservicePath }}_${{ inputs.tag }}
+          path: ${{ github.workspace }}/${{ inputs.microservicePath }}/sbom_${{ inputs.microservicePath }}_${{ inputs.tag }}.json
+          retention-days: 4

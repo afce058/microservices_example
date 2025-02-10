@@ -1,0 +1,78 @@
+name: on pr merged
+on:
+  workflow_dispatch:
+    inputs:
+      services:
+        description: "services list separated with comma eg:service1,service2"
+        required: true
+        default: "service1,service2"
+      deployFront:
+        description: Flag to deploy frontend
+        required: true
+        default: "no"
+
+env:
+  cluster_services: "['service1','service2','frontend']"
+  namespace: micros
+  parallel: 2
+
+jobs:
+  parameters:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.capture.outputs.services }}
+      namespace: ${{ steps.capture.outputs.namespace }}
+      parallel: ${{ steps.capture.outputs.parallel }}
+      deployFront: ${{ steps.capture.outputs.deployFront }}
+      frontPath: ${{ steps.capture.outputs.frontPath }}
+    steps:
+      - name: save workflow parameters
+        id: capture
+        run: |
+          services_json=$(echo '${{ github.event.inputs.services }}' | jq -R -c 'split(",")')
+          echo "services=$services_json" >> GITHUB_OUTPUT
+          echo "namespace=${{ env.namespace }}" >> GITHUB_OUTPUT
+          echo "parallel=${{ env.parallel }}" >> GITHUB_OUTPUT
+          echo "frontPath=${{ fromJson(env.cluster_services)[2] }}" >> GITHUB_OUTPUT
+          echo "deployFront=${{ github.event.inputs.deployFront }}" >> GITHUB_OUTPUT
+    
+  run_tests:
+    uses: ./.github/workflows/run_tests.yaml
+    needs: parameters
+    strategy:
+      matrix:
+        micro: ${{ fromJson(needs.parameters.outputs.services) }}
+      max-parallel: ${{ needs.parameters.outputs.parallel }}
+    with:
+      microservicePath: ${{ matrix.micro }}
+  
+  create_tag:
+    runs-on: ubuntu-latest
+    needs: run_tests
+    outputs:
+      tag_version: ${{ env.GitVersion_Semver }}
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: install git version
+        uses: gittools/actions/gitversion/setup@v3.1.11
+        with:
+          versionSpec: '6.0.x'
+      - name: execute gitversion
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3.1.11
+
+  create_sbom:
+    uses: ./.github/workflows/create_sbom.yaml
+    needs: 
+      - parameters
+      - compute_tag
+    strategy:
+      matrix:
+        micro: ${{ fromJson(needs.parameters.outputs.services) }}
+      max-parallel: ${{ needs.parameters.outputs.parallel }}
+    with:
+      tag: ${{ needs.compute_tag.outputs.tag_version }}
+      microservicePath: ${{ matrix.micro }}

@@ -1,0 +1,31 @@
+name: Test microservice
+on:
+  workflow_call:
+    inputs:
+      microservicePath:
+        required: true
+        type: string
+jobs:
+  run_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout microservice
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            ${{ inputs.microservicePath }}
+      - name: setup nodejs
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: run tests
+        working-directory: ${{ github.workspace }}/${{ inputs.microservicePath }}
+        run: |
+          npm install
+          npm test
+      - name: Add report to summary
+        working-directory: ${{ github.workspace }}/${{ inputs.microservicePath }}
+        run: |
+          cat test_results_${{ inputs.microservicePath }}.md >> \
+          $GITHUB_STEP_SUMMARY
