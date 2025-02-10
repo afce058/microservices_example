@@ -1,4 +1,9 @@
 name: on pr merged
+permissions:
+  actions: write
+  packages: write
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
