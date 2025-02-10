@@ -110,7 +110,7 @@ jobs:
       max-parallel: ${{ fromJson(needs.parameters.outputs.parallel) }}
     with:
       tag: ${{ needs.create_tag.outputs.tag_version }}
-      microservicePath: ${{ matrix.micro }}
+      frontendPath: ${{ matrix.micro }}
       dockerfileName: Dockerfile
       baseAddr: localhost:4000
     secrets:
