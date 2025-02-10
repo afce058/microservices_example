@@ -22,7 +22,7 @@ class MarkdownReporter {
         markdown += `- **Skipped tests**: ${ results.numPendingTests }\n`;
 
         results.testResults.forEach(suite => {
-            markdown += `# ${suite.testPathFile}\n`;
+            markdown += `# ${suite.testFilePath}\n`;
 
             suite.testResults.forEach(test => {
                 const icon = test.status === "passed" ? "✅": "❌";
