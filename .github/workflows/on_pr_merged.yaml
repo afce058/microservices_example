@@ -98,6 +98,7 @@ jobs:
 
   create_front_container:
     uses: ./.github/workflows/create_container_front.yaml
+    if: inputs.deployFront == 'yes'
     needs:
       - parameters
       - create_tag
