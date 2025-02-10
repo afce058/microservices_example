@@ -45,7 +45,7 @@ jobs:
         working-directory: ${{ github.workspace }}/${{ inputs.microservicePath }}
         run: |
           docker build -t \
-          ${{ secrets.DOCKER_REGISTRY }}/\
+          docker.io/\
           ${{ inputs.microservicePath }}:\
           ${{ inputs.tag }} \
           --file ${{ inputs.dockerfileName }} \
