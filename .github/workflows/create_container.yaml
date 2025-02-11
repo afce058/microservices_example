@@ -37,7 +37,10 @@ jobs:
           docker build -t \
           ${{ secrets.DOCKER_USERNAME }}/\
           ${{ inputs.microservicePath }}:\
-          ${{ inputs.tag }}
+          ${{ inputs.tag }} \
+          --file ${{ inputs.dockerfileName }} \
+          .
+
       - name: scan images with trivy
         uses: aquasecurity/trivy-action@master
         with:
