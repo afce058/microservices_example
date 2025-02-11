@@ -98,19 +98,16 @@ jobs:
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
   create_container_front:
-    uses: ./.github/workflows/create_container.yaml
+    uses: ./.github/workflows/create_container_front.yaml
+    if: inputs.deployFront == 'yes'
     needs:
       - create_sbom
       - run_tests
       - create_tag
       - parameters
       - create_containers
-    strategy:
-      matrix:
-        micro: ${{ fromJson(needs.parameters.outputs.services) }}
-      max-parallel: ${{ fromJson(needs.parameters.outputs.parallel) }}
     with:
-      frontendPath: ${{ matrix.micro }}
+      frontendPath: ${{ needs.parameters.outputs.frontPath }}
       tag: ${{ needs.create_tag.outputs.tag_version }}
       dockerfileName: Dockerfile
       balancerAddr: localhost
