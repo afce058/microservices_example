@@ -51,5 +51,5 @@ spec:
         env:
           - name: PORT
             value: "80"
-      imagePullSecret:
+      imagePullSecrets:
         - name: pullsecret       
