@@ -77,3 +77,19 @@ jobs:
     with:
       tag: ${{ needs.create_tag.outputs.tag_version }}
       microservicePath: ${{ matrix.micro }}
+  
+  create_containers:
+    uses: ./.github/workflows/create_container.yaml
+    needs:
+      - create_sbom
+      - run_tests
+      - create_tag
+      - parameters
+    strategy:
+      matrix:
+        micro: ${{ fromJson(needs.parameters.outputs.services) }}
+      max-parallel: ${{ fromJson(needs.parameters.outputs.parallel) }}
+    with:
+      microservicePath: ${{ matrix.micro }}
+      tag: ${{ needs.create_tag.outputs.tag_version }}
+      dockerfileName: Dockerfile
