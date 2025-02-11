@@ -1,0 +1,75 @@
+name: Create service container
+on:
+
+  workflow_call:
+    inputs:
+      frontendPath:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+      dockerfileName:
+        required: true
+        type: string
+      balancerAddr:
+        required: true
+        type: string
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+jobs:
+  push_container:
+    runs-on: ubuntu-latest
+    steps:
+      - name: clone code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            ${{ inputs.frontendPath }}
+
+      - name: create .env
+        working-directory: ${{ github.workspace }}/${{ inputs.frontendPath }}
+        run: |
+          cat << EOF > .env
+          REACT_APP_BASE_URL1=http://${{ inputs.balancerAddr }}
+          REACT_APP_BASE_URL2=http://${{ inputs.balancerAddr }}
+          EOF
+
+      - name: docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: build docker image
+        working-directory: ${{ github.workspace }}/${{ inputs.frontendPath }}
+        run: |
+          docker build -t \
+          ${{ secrets.DOCKER_USERNAME }}/\
+          ${{ inputs.frontendPath }}:\
+          ${{ inputs.tag }} \
+          --file ${{ inputs.dockerfileName }} \
+          .
+
+      - name: scan images with trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/${{ inputs.frontendPath }}:${{ inputs.tag }}
+          format: sarif
+          outputs: trivy_results_${{ inputs.frontendPath }}_${{ inputs.tag }}.sarif
+          ignore-unfixed: true
+          severity: 'HIGH,CRITICAL'
+
+      - name: upload trivy results
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy_results_${{ inputs.frontendPath }}_${{ inputs.tag }}
+          path: trivy_results_${{ inputs.frontendPath }}_${{ inputs.tag }}.sarif
+      
+      - name: push container
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ inputs.frontendPath }}:${{ inputs.tag }}
