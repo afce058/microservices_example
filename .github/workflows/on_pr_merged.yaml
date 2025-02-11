@@ -157,7 +157,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           token: "${{ secrets.ACCESS_TOKEN }}"
-          tag_name: ${{ needs.parameters.outputs.tag_version }}
+          tag_name: ${{ needs.create_tag.outputs.tag_version }}
           generate_release_notes: true
           files: |
             ${{ github.workspace }}/deployment-automation/service1.yaml
