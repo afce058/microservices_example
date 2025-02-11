@@ -47,5 +47,5 @@ jobs:
         id: wait_balancer
         run: |
           kubectl wait --for=condition=available --timeout=120s deployment/kong-kong -n ${{ inputs.namespace }}
-          ADDR= $(kubectl get svc -n ${{ inputs.namespace }} kong-kong-proxy -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          ADDR=$(kubectl get svc -n ${{ inputs.namespace }} kong-kong-proxy -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
           echo "balancer_addr=$ADDR" >> $GITHUB_OUTPUT
