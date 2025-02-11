@@ -152,7 +152,7 @@ jobs:
           deploy.frontend: ${{ needs.parameters.outputs.deployFront }}
           docker.username: ${{ env.username }}
           namespace: ${{ env.namespace }}
-          tag: ${{ needs.parameters.outputs.tag_version }}
+          tag: ${{ needs.create_tag.outputs.tag_version }}
       - name: create release
         uses: softprops/action-gh-release@v2
         with:
