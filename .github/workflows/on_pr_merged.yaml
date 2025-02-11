@@ -1,4 +1,8 @@
 name: on pr merged
+permissions:
+  actions: write
+  packages: write
+  contents: read
 
 on:
   workflow_dispatch:
@@ -78,6 +82,16 @@ jobs:
       tag: ${{ needs.create_tag.outputs.tag_version }}
       microservicePath: ${{ matrix.micro }}
   
+  create_ingress_controller:
+    uses: ./.github/workflows/create_ingress_controller.yaml
+    needs:
+      - create_tag
+      - parameters
+    with:
+      namespace: ${{ needs.parameters.outputs.namespace }}
+    secrets:
+      KUBECONFIG: ${{ secrets.KUBECONFIG }}
+
   create_containers:
     uses: ./.github/workflows/create_container.yaml
     needs:
@@ -106,6 +120,7 @@ jobs:
       - create_tag
       - parameters
       - create_containers
+      - create_ingress_controller
     with:
       frontendPath: ${{ needs.parameters.outputs.frontPath }}
       tag: ${{ needs.create_tag.outputs.tag_version }}
@@ -114,3 +129,47 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  create_release:
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - parameters
+      - create_tag
+      - create_containers
+      - create_container_front
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: 'main'
+      - name: obtain docker username
+        run: |
+          echo "username=${{ secrets.DOCKER_USERNAME }}" >> $GITHUB_ENV
+      - name: Replace k8s tokens
+        uses: cschleiden/replace-tokens@v1.3
+        with:
+          files: '["${{ github.workspace }}/deployment-automation/*.yaml"]'
+        env:
+          docker.repo1: ${{ fromJson(env.cluster_services)[0] }}
+          docker.repo2: ${{ fromJson(env.cluster_services)[1] }}
+          docker.frontend: ${{ fromJson(env.cluster_services)[2] }}
+          deploy.service1: "${{ contains(needs.parameters.outputs.services, fromJson(env.cluster_services)[0]) && 'yes' || 'no'}}"
+          deploy.service2: "${{ contains(needs.parameters.outputs.services, fromJson(env.cluster_services)[1]) && 'yes' || 'no'}}"
+          deploy.frontend: ${{ needs.parameters.outputs.deployFront }}
+          docker.username: ${{ env.username }}
+          namespace: ${{ env.namespace }}
+          tag: ${{ needs.parameters.outputs.tag_version }}
+      - name: create release
+        uses: softprops/actions-gh-release@v2
+        with:
+          token: "${{ secrets.ACCESS_TOKEN }}"
+          tag_name: ${{ needs.parameters.outputs.tag_version }}
+          generate_release_notes: true
+          files: |
+            ${{ github.workspace }}/deployment-automation/service1.yaml
+            ${{ github.workspace }}/deployment-automation/service2.yaml
+            ${{ github.workspace }}/deployment-automation/service-frontend.yaml
+            ${{ github.workspace }}/deployment-automation/ingress.yaml
+            ${{ github.workspace }}/deployment-automation/ingress-frontend.yaml
