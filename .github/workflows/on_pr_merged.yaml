@@ -93,3 +93,6 @@ jobs:
       microservicePath: ${{ matrix.micro }}
       tag: ${{ needs.create_tag.outputs.tag_version }}
       dockerfileName: Dockerfile
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
