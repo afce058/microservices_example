@@ -40,7 +40,7 @@ jobs:
         run: |
           helm repo add kong https://charts.konghq.com
           helm repo update
-          helm update -- install kong kong/kong \
+          helm upgrade --install kong kong/kong \
           --namespace ${{ inputs.namespace }} --create-namespace
       
       - name: wait for balancer
