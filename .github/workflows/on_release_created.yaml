@@ -1,0 +1,44 @@
+name: On release created
+on:
+
+  release:
+    types: [published]
+  workflow_dispatch:
+    
+env:
+  namespace: micros
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: download release artifacts
+        uses: dsaltares/fecth-gh-release-asset@master
+        with:
+          regex: true
+          file: ".*\\.yaml"
+          target: "cluster/"
+      
+      - uses: azure/setup-kubectl@v3
+
+      - name: create kube folder
+        run: |
+          mkdir -p ~/.kube
+
+      - name: create config
+        run: |
+          cat << EOF > ~/.kube/config
+          ${{ secrets.KUBECONFIG }}
+          EOF
+
+      - name: create pull secret
+        run: |
+          kubectl create secret docker-registry pullsecret \
+          -n ${{ env.namespace }} \
+          --docker-server=docker.io \
+          --docker-username=${{ secrets.DOCKER_USERNAME }} \
+          --docker-password=${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: deploy manifests
+        run: |
+          kubectl apply -f ${{ github.workspace }}/cluster/ -l deploy=yes
