@@ -1,0 +1,21 @@
+api: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: service-ingress-frontend
+  namespace: #{namespace}#
+  labels:
+    deploy: "#{deploy.frontend}#"
+  annotations:
+    repo-tag: #{tag}#
+spec:
+  ingressClassName: kong
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: #{docker.frontend}#
+                port:
+                  name: 80

@@ -4,8 +4,8 @@ metadata:
   annotations:
     repo-tag: #{tag}#
   labels:
-    deploy: "#{deploy.service2}#"
-  name: #{docker.repo2}#
+    deploy: "#{deploy.frontend}#"
+  name: #{docker.frontend}#
   namespace: #{namespace}#
 spec:
   ports:
@@ -13,7 +13,7 @@ spec:
     protocol: TCP
     targetPort: 80
   selector:
-    app: #{docker.repo2}#
+    app: #{docker.frontend}#
   type: ClusterIP
 ---
 apiVersion: apps/v1
@@ -22,25 +22,25 @@ metadata:
   annotations:
     repo-tag: #{tag}#
   labels:
-    deploy: "#{deploy.service2}#"
-  name: #{docker.repo2}#
+    deploy: "#{deploy.frontend}#"
+  name: #{docker.frontend}#
   namespace: #{namespace}#
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: #{docker.repo2}#
+      app: #{docker.frontend}#
   template:
     metadata:
       annotations:
         repo-tag: #{tag}#
       labels:
-        app: #{docker.repo2}#
+        app: #{docker.frontend}#
     spec:
       containers:
-      - image: docker.io/#{docker.username}#/#{docker.repo2}#/#{tag}#
+      - image: docker.io/#{docker.username}#/#{docker.frontend}#/#{tag}#
         imagePullPolicy: Always
-        name: #{docker.repo2}#
+        name: #{docker.frontend}#
         resources:
           requests:
             cpu: "100m"
