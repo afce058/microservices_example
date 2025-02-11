@@ -82,15 +82,7 @@ jobs:
       tag: ${{ needs.create_tag.outputs.tag_version }}
       microservicePath: ${{ matrix.micro }}
   
-  create_ingress_controller:
-    uses: ./.github/workflows/create_ingress_controller.yaml
-    needs:
-      - create_tag
-      - parameters
-    with:
-      namespace: ${{ needs.parameters.outputs.namespace }}
-    secrets:
-      KUBECONFIG: ${{ secrets.KUBECONFIG }}
+
 
   create_containers:
     uses: ./.github/workflows/create_container.yaml
@@ -120,7 +112,7 @@ jobs:
       - create_tag
       - parameters
       - create_containers
-      - create_ingress_controller
+      #- create_ingress_controller
     with:
       frontendPath: ${{ needs.parameters.outputs.frontPath }}
       tag: ${{ needs.create_tag.outputs.tag_version }}
