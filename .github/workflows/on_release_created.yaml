@@ -37,7 +37,7 @@ jobs:
           -n ${{ env.namespace }} \
           --docker-server=docker.io \
           --docker-username=${{ secrets.DOCKER_USERNAME }} \
-          --docker-password=${{ secrets.DOCKER_PASSWORD }}
+          --docker-password=${{ secrets.DOCKER_PASSWORD }} | kubectl apply -f -
       
       - name: deploy manifests
         run: |
