@@ -38,7 +38,7 @@ spec:
         app: #{docker.frontend}#
     spec:
       containers:
-      - image: docker.io/#{docker.username}#/#{docker.frontend}#/#{tag}#
+      - image: docker.io/#{docker.username}#/#{docker.frontend}#:#{tag}#
         imagePullPolicy: Always
         name: #{docker.frontend}#
         resources:

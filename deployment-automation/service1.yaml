@@ -38,7 +38,7 @@ spec:
         app: #{docker.repo1}#
     spec:
       containers:
-      - image: docker.io/#{docker.username}#/#{docker.repo1}#/#{tag}#
+      - image: docker.io/#{docker.username}#/#{docker.repo1}#:#{tag}#
         imagePullPolicy: Always
         name: #{docker.repo1}#
         resources:
