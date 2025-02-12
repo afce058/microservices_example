@@ -18,11 +18,11 @@ spec:
               service:
                 name: #{docker.repo1}#
                 port:
-                  name: 80          
+                  number: 80          
           - path: /#{docker.repo2}#
             pathType: Prefix
             backend:
               service:
                 name: #{docker.repo2}#
                 port:
-                  name: 80
+                  number: 80
