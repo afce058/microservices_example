@@ -19,7 +19,7 @@ jobs:
           file: ".*\\.yaml"
           target: "cluster/"
       
-      - uses: azure/setup-kubectl@v3
+      - uses: azure/setup-kubectl@v4
 
       - name: create kube folder
         run: |
