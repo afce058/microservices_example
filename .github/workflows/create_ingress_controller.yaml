@@ -19,7 +19,7 @@ jobs:
     outputs:
       balancer_addr: ${{ steps.wait_balancer.outputs.balancer_addr }}
     steps:
-      - uses: azure/setup-helm@v4.2.0
+      - uses: azure/setup-helm@v4.3.0
       - uses: azure/setup-kubectl@v3
 
       - name: create kube folder
