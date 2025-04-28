@@ -62,12 +62,12 @@ jobs:
         with:
           fetch-depth: 0
       - name: install git version
-        uses: gittools/actions/gitversion/setup@v3.1.11
+        uses: gittools/actions/gitversion/setup@v3.2.1
         with:
           versionSpec: '6.0.x'
       - name: execute gitversion
         id: gitversion
-        uses: gittools/actions/gitversion/execute@v3.1.11
+        uses: gittools/actions/gitversion/execute@v3.2.1
 
   create_sbom:
     uses: ./.github/workflows/create_sbom.yaml
